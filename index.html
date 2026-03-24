@@ -561,7 +561,7 @@
     const id   = document.getElementById('s-id').value.trim();
     const hw   = document.getElementById('s-hw').value;
     const file = document.getElementById('pdf-file').files[0];
-    const apiKey = localStorage.getItem('api_key') || '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';
+    const apiKey = 'hidden-in-cloudflare';
 
     if (!name || !id || !hw) { showStatus('Please fill in name, student ID, and select homework.', 'error'); return; }
     if (!file) { showStatus('Please upload your AI chat PDF or screenshot.', 'error'); return; }
@@ -596,7 +596,6 @@
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            'x-api-key': apiKey,
             'anthropic-version': '2023-06-01'
           },
           body: JSON.stringify({
