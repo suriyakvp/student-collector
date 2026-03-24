@@ -1,0 +1,751 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Student AI Chat Submission</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap');
+
+  :root {
+    --bg: #f5f4f0;
+    --surface: #ffffff;
+    --border: #e2e0d8;
+    --border-strong: #c8c6bc;
+    --text: #1a1917;
+    --text-muted: #6b6960;
+    --text-hint: #9b9890;
+    --accent: #2d5be3;
+    --accent-light: #eef1fd;
+    --success: #1a7a4a;
+    --success-light: #edf7f2;
+    --danger: #c0392b;
+    --danger-light: #fdf0ee;
+    --warning: #b45309;
+    --warning-light: #fef9ee;
+    --radius: 10px;
+    --radius-lg: 16px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    padding: 2rem 1rem;
+  }
+
+  .container { max-width: 560px; margin: 0 auto; }
+
+  /* Header */
+  .header { margin-bottom: 2rem; }
+  .header .label {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    color: var(--text-hint);
+    text-transform: uppercase;
+    margin-bottom: 6px;
+  }
+  .header h1 { font-size: 22px; font-weight: 600; color: var(--text); }
+  .header p { font-size: 14px; color: var(--text-muted); margin-top: 4px; line-height: 1.6; }
+
+  /* Tabs */
+  .tabs {
+    display: flex;
+    gap: 4px;
+    background: var(--border);
+    padding: 3px;
+    border-radius: 8px;
+    margin-bottom: 1.5rem;
+  }
+  .tab {
+    flex: 1;
+    padding: 7px;
+    font-size: 13px;
+    font-weight: 500;
+    font-family: 'DM Sans', sans-serif;
+    border: none;
+    border-radius: 6px;
+    background: transparent;
+    color: var(--text-muted);
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .tab.active { background: var(--surface); color: var(--text); box-shadow: 0 1px 3px rgba(0,0,0,0.08); }
+
+  /* Card */
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 1.5rem;
+    margin-bottom: 1rem;
+  }
+  .card-title {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 1rem;
+  }
+
+  /* Fields */
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .field { margin-bottom: 14px; }
+  .field:last-child { margin-bottom: 0; }
+  .field label {
+    display: block;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--text-muted);
+    margin-bottom: 5px;
+  }
+  .field input, .field select {
+    width: 100%;
+    padding: 9px 12px;
+    font-size: 14px;
+    font-family: 'DM Sans', sans-serif;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--bg);
+    color: var(--text);
+    outline: none;
+    transition: border-color 0.15s;
+    appearance: none;
+  }
+  .field input:focus, .field select:focus { border-color: var(--accent); background: var(--surface); }
+
+  /* Upload */
+  .upload-area {
+    border: 1.5px dashed var(--border-strong);
+    border-radius: var(--radius);
+    padding: 2rem 1rem;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.15s;
+    background: var(--bg);
+    position: relative;
+  }
+  .upload-area:hover { border-color: var(--accent); background: var(--accent-light); }
+  .upload-area.dragover { border-color: var(--accent); background: var(--accent-light); }
+  .upload-area input[type="file"] {
+    position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%;
+  }
+  .upload-icon { font-size: 28px; margin-bottom: 8px; }
+  .upload-text { font-size: 14px; font-weight: 500; color: var(--text); }
+  .upload-hint { font-size: 12px; color: var(--text-hint); margin-top: 4px; }
+  .file-selected {
+    display: flex; align-items: center; gap: 10px;
+    background: var(--success-light); border: 1px solid #a8e6c4;
+    border-radius: var(--radius); padding: 10px 14px; margin-top: 10px;
+  }
+  .file-selected span { font-size: 13px; color: var(--success); font-weight: 500; }
+
+  /* Button */
+  .btn {
+    width: 100%; padding: 11px;
+    font-size: 14px; font-weight: 600;
+    font-family: 'DM Sans', sans-serif;
+    border: none; border-radius: var(--radius);
+    cursor: pointer; transition: all 0.15s;
+  }
+  .btn-primary { background: var(--accent); color: #fff; }
+  .btn-primary:hover { opacity: 0.9; transform: translateY(-1px); }
+  .btn-primary:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
+  .btn-secondary {
+    background: var(--bg); color: var(--text);
+    border: 1px solid var(--border);
+  }
+  .btn-secondary:hover { background: var(--border); }
+
+  /* Status */
+  .status {
+    padding: 12px 14px; border-radius: var(--radius);
+    font-size: 13px; line-height: 1.6; margin-top: 12px;
+  }
+  .status.success { background: var(--success-light); color: var(--success); border: 1px solid #a8e6c4; }
+  .status.error { background: var(--danger-light); color: var(--danger); border: 1px solid #f5b8b3; }
+  .status.loading { background: var(--accent-light); color: var(--accent); border: 1px solid #c5d0f8; }
+
+  /* Progress */
+  .progress { margin-top: 12px; }
+  .progress-bar {
+    height: 4px; background: var(--border);
+    border-radius: 2px; overflow: hidden;
+  }
+  .progress-fill {
+    height: 100%; background: var(--accent);
+    border-radius: 2px; transition: width 0.4s ease;
+    width: 0%;
+  }
+  .progress-label { font-size: 12px; color: var(--text-hint); margin-top: 6px; }
+
+  /* Professor Table */
+  .prof-header {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 1rem;
+  }
+  .prof-header h2 { font-size: 16px; font-weight: 600; }
+  .prof-actions { display: flex; gap: 8px; }
+  .btn-sm {
+    padding: 6px 12px; font-size: 12px; font-weight: 500;
+    font-family: 'DM Sans', sans-serif;
+    border: 1px solid var(--border); border-radius: 6px;
+    background: var(--surface); color: var(--text-muted);
+    cursor: pointer;
+  }
+  .btn-sm:hover { background: var(--bg); }
+
+  .stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 1rem; }
+  .stat {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 12px 14px;
+  }
+  .stat-num { font-size: 22px; font-weight: 600; color: var(--text); }
+  .stat-label { font-size: 11px; color: var(--text-hint); margin-top: 2px; }
+
+  .filter-row { display: flex; gap: 8px; margin-bottom: 12px; }
+  .filter-row select, .filter-row input {
+    padding: 7px 10px; font-size: 13px;
+    font-family: 'DM Sans', sans-serif;
+    border: 1px solid var(--border); border-radius: 6px;
+    background: var(--surface); color: var(--text); outline: none;
+  }
+  .filter-row input { flex: 1; }
+
+  .tbl-wrap { overflow-x: auto; border: 1px solid var(--border); border-radius: var(--radius); }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; min-width: 700px; }
+  th {
+    font-size: 11px; font-weight: 600; color: var(--text-hint);
+    text-transform: uppercase; letter-spacing: 0.05em;
+    padding: 10px 12px; text-align: left;
+    background: var(--bg); border-bottom: 1px solid var(--border);
+    white-space: nowrap;
+  }
+  td { padding: 10px 12px; border-bottom: 1px solid var(--border); vertical-align: top; color: var(--text); }
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: var(--bg); }
+  .prompt-cell { font-size: 12px; color: var(--text-muted); max-width: 160px; }
+  .prompt-tag {
+    display: inline-block; background: var(--accent-light);
+    color: var(--accent); font-size: 11px; font-weight: 500;
+    padding: 2px 7px; border-radius: 4px; margin: 2px 2px 2px 0;
+    font-family: 'DM Mono', monospace;
+  }
+  .hw-badge {
+    display: inline-block; background: var(--warning-light);
+    color: var(--warning); font-size: 11px; font-weight: 600;
+    padding: 3px 8px; border-radius: 4px;
+    font-family: 'DM Mono', monospace;
+  }
+  .empty-state { text-align: center; padding: 3rem; color: var(--text-hint); font-size: 14px; }
+
+  /* Setup */
+  .setup-step {
+    display: flex; gap: 14px; margin-bottom: 1.2rem;
+    padding-bottom: 1.2rem; border-bottom: 1px solid var(--border);
+  }
+  .setup-step:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
+  .step-num {
+    width: 28px; height: 28px; border-radius: 50%;
+    background: var(--accent-light); color: var(--accent);
+    font-size: 13px; font-weight: 600;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0; margin-top: 2px;
+  }
+  .step-content h4 { font-size: 14px; font-weight: 600; margin-bottom: 4px; }
+  .step-content p { font-size: 13px; color: var(--text-muted); line-height: 1.6; }
+  .code-block {
+    background: #1a1917; color: #e8e6e0;
+    border-radius: var(--radius); padding: 14px;
+    font-family: 'DM Mono', monospace; font-size: 12px;
+    line-height: 1.7; margin-top: 10px; white-space: pre-wrap;
+    word-break: break-all;
+  }
+  .copy-btn {
+    display: inline-block; margin-top: 8px;
+    padding: 5px 12px; font-size: 12px; font-weight: 500;
+    font-family: 'DM Sans', sans-serif;
+    border: 1px solid var(--border); border-radius: 6px;
+    background: var(--surface); color: var(--text-muted);
+    cursor: pointer;
+  }
+  .copy-btn:hover { background: var(--bg); }
+
+  .screen { display: none; }
+  .screen.active { display: block; }
+</style>
+</head>
+<body>
+<div class="container">
+  <div class="header">
+    <div class="label">AI Classroom Tool</div>
+    <h1>Student Prompt Collector</h1>
+    <p>Students upload their AI chat PDF — prompts are extracted automatically and saved to Google Sheets.</p>
+  </div>
+
+  <div class="tabs">
+    <button class="tab active" onclick="switchTab('student', this)">Student Submit</button>
+    <button class="tab" onclick="switchTab('professor', this)">Professor View</button>
+    <button class="tab" onclick="switchTab('setup', this)">Setup</button>
+  </div>
+
+  <!-- STUDENT TAB -->
+  <div id="tab-student" class="screen active">
+    <div class="card">
+      <div class="card-title">Your information</div>
+      <div class="grid2">
+        <div class="field">
+          <label>Full name</label>
+          <input id="s-name" type="text" placeholder="e.g. John Smith" />
+        </div>
+        <div class="field">
+          <label>Student ID</label>
+          <input id="s-id" type="text" placeholder="e.g. 6401234" />
+        </div>
+      </div>
+      <div class="field">
+        <label>Homework / Assignment</label>
+        <select id="s-hw">
+          <option value="">Select homework...</option>
+          <option>HW1</option><option>HW2</option><option>HW3</option>
+          <option>HW4</option><option>HW5</option><option>HW6</option>
+          <option>HW7</option><option>HW8</option><option>HW9</option><option>HW10</option>
+          <option>Midterm</option><option>Final</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Upload your AI chat</div>
+      <div class="upload-area" id="upload-area">
+        <input type="file" id="pdf-file" accept=".pdf,image/*" onchange="fileSelected(this)" />
+        <div class="upload-icon">📄</div>
+        <div class="upload-text">Click to upload or drag & drop</div>
+        <div class="upload-hint">PDF or screenshot (JPG, PNG) — export from ChatGPT / Gemini / Claude</div>
+      </div>
+      <div id="file-info" style="display:none" class="file-selected">
+        <span>✅ <span id="file-name"></span></span>
+      </div>
+      <div style="margin-top:10px;padding:10px 12px;background:var(--bg);border-radius:var(--radius);font-size:12px;color:var(--text-muted);line-height:1.7">
+        <strong>How to export your chat as PDF:</strong><br>
+        ChatGPT / Gemini / Claude → Press <code style="background:var(--border);padding:1px 5px;border-radius:3px">Ctrl+P</code> → Save as PDF → Upload here
+      </div>
+    </div>
+
+    <button class="btn btn-primary" id="submit-btn" onclick="submitStudent()">Extract prompts & submit</button>
+    <div id="progress" class="progress" style="display:none">
+      <div class="progress-bar"><div class="progress-fill" id="progress-fill"></div></div>
+      <div class="progress-label" id="progress-label">Processing...</div>
+    </div>
+    <div id="s-status"></div>
+  </div>
+
+  <!-- PROFESSOR TAB -->
+  <div id="tab-professor" class="screen">
+    <div class="prof-header">
+      <h2>Submissions</h2>
+      <div class="prof-actions">
+        <button class="btn-sm" onclick="clearAll()">Clear all</button>
+        <button class="btn-sm" onclick="downloadCSV()">Download CSV</button>
+      </div>
+    </div>
+
+    <div class="stats">
+      <div class="stat"><div class="stat-num" id="stat-total">0</div><div class="stat-label">Total submissions</div></div>
+      <div class="stat"><div class="stat-num" id="stat-students">0</div><div class="stat-label">Students</div></div>
+      <div class="stat"><div class="stat-num" id="stat-prompts">0</div><div class="stat-label">Total prompts</div></div>
+    </div>
+
+    <div class="filter-row">
+      <input id="search" placeholder="Search by name or ID..." oninput="renderTable()" />
+      <select id="filter-hw" onchange="renderTable()">
+        <option value="">All homework</option>
+        <option>HW1</option><option>HW2</option><option>HW3</option><option>HW4</option><option>HW5</option>
+      </select>
+    </div>
+
+    <div class="tbl-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Time</th>
+            <th>Name</th>
+            <th>ID</th>
+            <th>HW</th>
+            <th>Count</th>
+            <th>Prompts</th>
+          </tr>
+        </thead>
+        <tbody id="log-body">
+          <tr><td colspan="7" class="empty-state">No submissions yet</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- SETUP TAB -->
+  <div id="tab-setup" class="screen">
+    <div class="card">
+      <div class="card-title">Configuration</div>
+      <div class="field">
+        <label>Anthropic API key</label>
+        <input id="api-key" type="password" placeholder="sk-ant-..." />
+      </div>
+      <div class="field">
+        <label>Google Apps Script URL (for Google Sheets)</label>
+        <input id="sheets-url" type="text" placeholder="https://script.google.com/macros/s/..." />
+      </div>
+      <button class="btn btn-primary" onclick="saveConfig()" style="margin-bottom:8px">Save settings</button>
+      <div id="config-status"></div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Step by step setup</div>
+
+      <div class="setup-step">
+        <div class="step-num">1</div>
+        <div class="step-content">
+          <h4>Get Anthropic API key</h4>
+          <p>Go to <strong>console.anthropic.com</strong> → Sign in → API Keys → Create Key → paste above.</p>
+        </div>
+      </div>
+
+      <div class="setup-step">
+        <div class="step-num">2</div>
+        <div class="step-content">
+          <h4>Create Google Sheet</h4>
+          <p>Go to <strong>sheets.google.com</strong> → Create new sheet → name it "Student Prompts".</p>
+        </div>
+      </div>
+
+      <div class="setup-step">
+        <div class="step-num">3</div>
+        <div class="step-content">
+          <h4>Open Apps Script</h4>
+          <p>In Google Sheets → click <strong>Extensions → Apps Script</strong> → delete existing code → paste this:</p>
+          <div class="code-block" id="apps-script-code">function doPost(e) {
+  try {
+    var sheet = SpreadsheetApp.getActiveSpreadsheet();
+    var data = JSON.parse(e.postData.contents);
+    var hw = data.hw || 'General';
+
+    // Get or create sheet tab for this homework
+    var tab = sheet.getSheetByName(hw);
+    if (!tab) {
+      tab = sheet.insertSheet(hw);
+      // Add headers
+      var headers = ['Time', 'Name', 'Student ID'];
+      for (var i = 1; i <= 20; i++) headers.push('Prompt ' + i);
+      tab.appendRow(headers);
+      tab.getRange(1, 1, 1, headers.length)
+         .setFontWeight('bold')
+         .setBackground('#e8f0fe');
+    }
+
+    // Build row: time, name, id, then each prompt in its own column
+    var row = [data.time, data.name, data.id];
+    var prompts = data.prompts || [];
+    for (var j = 0; j < prompts.length; j++) {
+      row.push(prompts[j]);
+    }
+    tab.appendRow(row);
+
+    // Also log to master sheet
+    var master = sheet.getSheetByName('All Submissions');
+    if (!master) {
+      master = sheet.insertSheet('All Submissions');
+      master.appendRow(['Time','Name','ID','HW','Total Prompts','Prompt 1','Prompt 2','Prompt 3']);
+      master.getRange(1,1,1,8).setFontWeight('bold').setBackground('#fce8e6');
+    }
+    var masterRow = [data.time, data.name, data.id, hw, prompts.length];
+    for (var k = 0; k < Math.min(prompts.length, 10); k++) masterRow.push(prompts[k]);
+    master.appendRow(masterRow);
+
+    return ContentService
+      .createTextOutput(JSON.stringify({status:'ok'}))
+      .setMimeType(ContentService.MimeType.JSON);
+  } catch(err) {
+    return ContentService
+      .createTextOutput(JSON.stringify({status:'error', message: err.toString()}))
+      .setMimeType(ContentService.MimeType.JSON);
+  }
+}</div>
+          <button class="copy-btn" onclick="copyScript()">Copy code</button>
+        </div>
+      </div>
+
+      <div class="setup-step">
+        <div class="step-num">4</div>
+        <div class="step-content">
+          <h4>Deploy Apps Script</h4>
+          <p>Click <strong>Deploy → New deployment → Web app</strong><br>
+          Execute as: <strong>Me</strong> | Access: <strong>Anyone</strong><br>
+          Click Deploy → copy the URL → paste in Setup above.</p>
+        </div>
+      </div>
+
+      <div class="setup-step">
+        <div class="step-num">5</div>
+        <div class="step-content">
+          <h4>Host this file on GitHub Pages</h4>
+          <p>1. Go to <strong>github.com</strong> → New repository<br>
+          2. Upload this HTML file as <strong>index.html</strong><br>
+          3. Settings → Pages → Deploy from main branch<br>
+          4. Your link: <strong>yourname.github.io/repo-name</strong><br>
+          5. Share that link with students ✅</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  // Storage
+  let log = JSON.parse(localStorage.getItem('prompt_log') || '[]');
+
+  function saveLog() { localStorage.setItem('prompt_log', JSON.stringify(log)); }
+
+  function switchTab(t, el) {
+    document.querySelectorAll('.tab').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    document.getElementById('tab-' + t).classList.add('active');
+    el.classList.add('active');
+    if (t === 'professor') renderTable();
+  }
+
+  function saveConfig() {
+    const key = document.getElementById('api-key').value.trim();
+    const url = document.getElementById('sheets-url').value.trim();
+    if (key) localStorage.setItem('api_key', key);
+    if (url) localStorage.setItem('sheets_url', url);
+    document.getElementById('config-status').innerHTML =
+      '<div class="status success">Settings saved!</div>';
+  }
+
+  // Load saved config
+  window.onload = () => {
+    const k = localStorage.getItem('api_key');
+    const u = localStorage.getItem('sheets_url');
+    if (k) document.getElementById('api-key').value = k;
+    if (u) document.getElementById('sheets-url').value = u;
+  };
+
+  function fileSelected(input) {
+    const file = input.files[0];
+    if (!file) return;
+    document.getElementById('file-name').textContent = file.name;
+    document.getElementById('file-info').style.display = 'flex';
+    document.getElementById('upload-area').style.borderColor = 'var(--success)';
+  }
+
+  function setProgress(pct, label) {
+    document.getElementById('progress').style.display = 'block';
+    document.getElementById('progress-fill').style.width = pct + '%';
+    document.getElementById('progress-label').textContent = label;
+  }
+
+  function showStatus(msg, type) {
+    document.getElementById('s-status').innerHTML =
+      `<div class="status ${type}">${msg}</div>`;
+  }
+
+  async function submitStudent() {
+    const name = document.getElementById('s-name').value.trim();
+    const id   = document.getElementById('s-id').value.trim();
+    const hw   = document.getElementById('s-hw').value;
+    const file = document.getElementById('pdf-file').files[0];
+    const apiKey = localStorage.getItem('api_key') || '';
+
+    if (!name || !id || !hw) { showStatus('Please fill in name, student ID, and select homework.', 'error'); return; }
+    if (!file) { showStatus('Please upload your AI chat PDF or screenshot.', 'error'); return; }
+
+    const btn = document.getElementById('submit-btn');
+    btn.disabled = true;
+
+    setProgress(20, 'Reading your file...');
+
+    try {
+      // Convert file to base64
+      const base64 = await new Promise((res, rej) => {
+        const reader = new FileReader();
+        reader.onload = () => res(reader.result.split(',')[1]);
+        reader.onerror = rej;
+        reader.readAsDataURL(file);
+      });
+
+      setProgress(40, 'Sending to Claude API...');
+
+      const isImage = file.type.startsWith('image/');
+      const mediaType = isImage ? file.type : 'application/pdf';
+
+      let prompts = [];
+
+      if (apiKey) {
+        const contentBlock = isImage
+          ? { type: 'image', source: { type: 'base64', media_type: mediaType, data: base64 } }
+          : { type: 'document', source: { type: 'base64', media_type: 'application/pdf', data: base64 } };
+
+        const res = await fetch('https://api.anthropic.com/v1/messages', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'x-api-key': apiKey,
+            'anthropic-version': '2023-06-01'
+          },
+          body: JSON.stringify({
+            model: 'claude-sonnet-4-20250514',
+            max_tokens: 2000,
+            messages: [{
+              role: 'user',
+              content: [
+                contentBlock,
+                {
+                  type: 'text',
+                  text: `This is a student's AI chat export. Extract ONLY the student's messages/prompts (not the AI responses). 
+Return them as a JSON array of strings, one prompt per item. 
+Only return the JSON array, nothing else. Example: ["What is RAM?", "How does CPU work?"]
+If you cannot find prompts, return an empty array: []`
+                }
+              ]
+            }]
+          })
+        });
+
+        const data = await res.json();
+        if (data.content && data.content[0]) {
+          try {
+            const text = data.content[0].text.trim();
+            const clean = text.replace(/```json|```/g, '').trim();
+            prompts = JSON.parse(clean);
+          } catch(e) {
+            prompts = ['Could not extract — see original file'];
+          }
+        }
+      } else {
+        prompts = ['No API key set — file received but not extracted'];
+      }
+
+      setProgress(70, 'Saving to Google Sheets...');
+
+      const entry = {
+        time: new Date().toLocaleString(),
+        name, id, hw,
+        prompts,
+        count: prompts.length
+      };
+
+      // Save to Google Sheets if URL is set
+      const sheetsUrl = localStorage.getItem('sheets_url');
+      if (sheetsUrl) {
+        try {
+          await fetch(sheetsUrl, {
+            method: 'POST',
+            mode: 'no-cors',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(entry)
+          });
+        } catch(e) { console.log('Sheets error:', e); }
+      }
+
+      // Save locally
+      log.push(entry);
+      saveLog();
+
+      setProgress(100, 'Done!');
+      setTimeout(() => { document.getElementById('progress').style.display = 'none'; }, 1000);
+
+      showStatus(`✅ Submitted! ${prompts.length} prompt${prompts.length !== 1 ? 's' : ''} extracted. Thank you, ${name}!`, 'success');
+
+      // Reset form
+      document.getElementById('s-name').value = '';
+      document.getElementById('s-id').value = '';
+      document.getElementById('s-hw').value = '';
+      document.getElementById('pdf-file').value = '';
+      document.getElementById('file-info').style.display = 'none';
+      document.getElementById('upload-area').style.borderColor = '';
+
+    } catch(err) {
+      showStatus('Error: ' + err.message, 'error');
+    }
+
+    btn.disabled = false;
+  }
+
+  function renderTable() {
+    const search = document.getElementById('search').value.toLowerCase();
+    const hwFilter = document.getElementById('filter-hw').value;
+    const tbody = document.getElementById('log-body');
+
+    let filtered = log.filter(e => {
+      const matchSearch = !search || e.name.toLowerCase().includes(search) || e.id.toLowerCase().includes(search);
+      const matchHw = !hwFilter || e.hw === hwFilter;
+      return matchSearch && matchHw;
+    });
+
+    // Stats
+    document.getElementById('stat-total').textContent = log.length;
+    document.getElementById('stat-students').textContent = new Set(log.map(e => e.id)).size;
+    document.getElementById('stat-prompts').textContent = log.reduce((a, e) => a + (e.count || 0), 0);
+
+    if (!filtered.length) {
+      tbody.innerHTML = '<tr><td colspan="7" class="empty-state">No submissions yet</td></tr>';
+      return;
+    }
+
+    tbody.innerHTML = filtered.map((e, i) => {
+      const promptTags = (e.prompts || []).slice(0, 5).map(p =>
+        `<span class="prompt-tag">${p.substring(0, 30)}${p.length > 30 ? '...' : ''}</span>`
+      ).join('');
+      const more = e.prompts && e.prompts.length > 5 ? `<span style="font-size:11px;color:var(--text-hint)">+${e.prompts.length - 5} more</span>` : '';
+      return `<tr>
+        <td style="color:var(--text-hint);font-size:12px">${i + 1}</td>
+        <td style="font-size:12px;white-space:nowrap;color:var(--text-muted)">${e.time}</td>
+        <td style="font-weight:500">${e.name}</td>
+        <td style="font-family:'DM Mono',monospace;font-size:12px">${e.id}</td>
+        <td><span class="hw-badge">${e.hw}</span></td>
+        <td style="text-align:center;font-weight:600">${e.count || 0}</td>
+        <td class="prompt-cell">${promptTags}${more}</td>
+      </tr>`;
+    }).join('');
+  }
+
+  function clearAll() {
+    if (!confirm('Clear all submissions? This cannot be undone.')) return;
+    log = []; saveLog(); renderTable();
+  }
+
+  function downloadCSV() {
+    if (!log.length) { alert('No data to download.'); return; }
+    const maxPrompts = Math.max(...log.map(e => (e.prompts || []).length));
+    const headers = ['Time', 'Name', 'Student ID', 'Homework', 'Total Prompts'];
+    for (let i = 1; i <= maxPrompts; i++) headers.push('Prompt ' + i);
+    const rows = log.map(e => {
+      const row = [e.time, e.name, e.id, e.hw, e.count || 0];
+      (e.prompts || []).forEach(p => row.push('"' + p.replace(/"/g, '""') + '"'));
+      return row.join(',');
+    });
+    const csv = [headers.join(','), ...rows].join('\n');
+    const a = document.createElement('a');
+    a.href = 'data:text/csv;charset=utf-8,' + encodeURIComponent(csv);
+    a.download = 'student_prompts.csv';
+    a.click();
+  }
+
+  function copyScript() {
+    const code = document.getElementById('apps-script-code').textContent;
+    navigator.clipboard.writeText(code).then(() => {
+      const btn = event.target;
+      btn.textContent = 'Copied!';
+      setTimeout(() => btn.textContent = 'Copy code', 2000);
+    });
+  }
+</script>
+</body>
+</html>
