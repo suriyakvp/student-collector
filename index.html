@@ -561,7 +561,7 @@
     const id   = document.getElementById('s-id').value.trim();
     const hw   = document.getElementById('s-hw').value;
     const file = document.getElementById('pdf-file').files[0];
-    const apiKey = 'hidden-in-cloudflare';
+    const apiKey = localStorage.getItem('api_key') || 'hidden-in-cloudflare';
 
     if (!name || !id || !hw) { showStatus('Please fill in name, student ID, and select homework.', 'error'); return; }
     if (!file) { showStatus('Please upload your AI chat PDF or screenshot.', 'error'); return; }
