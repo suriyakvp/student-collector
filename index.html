@@ -561,7 +561,7 @@
     const id   = document.getElementById('s-id').value.trim();
     const hw   = document.getElementById('s-hw').value;
     const file = document.getElementById('pdf-file').files[0];
-    const apiKey = localStorage.getItem('api_key') || '';
+    const apiKey = localStorage.getItem('api_key') || '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';
 
     if (!name || !id || !hw) { showStatus('Please fill in name, student ID, and select homework.', 'error'); return; }
     if (!file) { showStatus('Please upload your AI chat PDF or screenshot.', 'error'); return; }
@@ -642,7 +642,7 @@ If you cannot find prompts, return an empty array: []`
       };
 
       // Save to Google Sheets if URL is set
-      const sheetsUrl = localStorage.getItem('sheets_url');
+      const sheetsUrl = localStorage.getItem('sheets_url') || 'https://script.google.com/macros/s/AKfycbx5qHeesSoiYD2qeZ-EomYOo8ACP3jNlsCbjGTvspqATfeAdCXM5BTc3ge33rwr1wSsMg/exec';
       if (sheetsUrl) {
         try {
           await fetch(sheetsUrl, {
