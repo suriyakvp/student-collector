@@ -607,10 +607,33 @@
                 contentBlock,
                 {
                   type: 'text',
-                  text: `This is a student's AI chat export. Extract ONLY the student's messages/prompts (not the AI responses). 
-Return them as a JSON array of strings, one prompt per item. 
-Only return the JSON array, nothing else. Example: ["What is RAM?", "How does CPU work?"]
-If you cannot find prompts, return an empty array: []`
+                  text: `You are reading an exported AI chat conversation (PDF or screenshot).
+
+TASK: Extract ONLY the human/user questions and requests. Apply ALL rules below carefully.
+
+EXTRACTION RULES:
+- SKIP all AI/assistant responses entirely
+- SKIP code blocks, error messages, stack traces, terminal output, file contents
+- SKIP image descriptions, file upload mentions like "[image uploaded]" or "[file attached]"
+- SKIP UI elements: "Copy code", "Regenerate", "Share", "Like", "Dislike", "Edit"
+- SKIP timestamps, page numbers, watermarks, platform branding
+- SKIP short meaningless replies like: "ok", "yes", "no", "thanks", "continue", "sure", "got it", "okay"
+- SKIP duplicate prompts — if same question appears twice, keep only once
+
+CLEANING RULES (apply to every extracted prompt):
+- If prompt contains BOTH a question AND code/error — remove the code/error, keep only the question
+- Example: "I got this error: TypeError undefined how do I fix?" → "How do I fix TypeError undefined error?"
+- Fix obvious spelling mistakes: "how dos cpu wurk" → "How does CPU work?"
+- Fix grammar errors while keeping original meaning
+- Remove extra spaces, tabs, and unnecessary line breaks
+- Fix double punctuation: "What is RAM??" → "What is RAM?"
+- Capitalize the first letter of every prompt
+- If prompt is longer than 100 characters → summarize to the key question under 100 characters
+- If a prompt is truly unclear and cannot be understood → label it as "[Unclear prompt]"
+
+Return ONLY a valid JSON array of strings, nothing else. No explanation, no markdown.
+Example: ["What is RAM?", "How does CPU work?", "Explain cache memory simply"]
+If no human prompts found, return: []`
                 }
               ]
             }]
