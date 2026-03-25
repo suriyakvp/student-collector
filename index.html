@@ -628,11 +628,22 @@ CLEANING RULES (apply to every extracted prompt):
 - Remove extra spaces, tabs, and unnecessary line breaks
 - Fix double punctuation: "What is RAM??" → "What is RAM?"
 - Capitalize the first letter of every prompt
-- If prompt is longer than 100 characters → summarize to the key question under 100 characters
 - If a prompt is truly unclear and cannot be understood → label it as "[Unclear prompt]"
 
+CHINESE TRANSLATION RULE:
+- If any prompt is written in Chinese (Traditional or Simplified), silently translate it to clean natural English — no label, no note, just the English version
+- Example: "記憶體如何運作？" → "How does memory work?"
+- Mixed Chinese/English: translate Chinese parts, keep English parts as-is
+- If a Chinese prompt is also long, translate it first then summarize it
+
+SUMMARIZATION RULE:
+- If any prompt (English or translated) is longer than 100 characters, shorten it by removing filler words, repeated points, and unnecessary context — but keep the student's original phrasing and tone
+- Do NOT rewrite into a bullet or formal sentence — it should still sound like the student wrote it, just tighter
+- Keep all the key questions and intent intact, just cut the excess
+- Example: "Hey so I've been really struggling to understand how the CPU works with the RAM and I just can't figure out the difference between cache memory and regular RAM and also why cache is so much faster than the others" → "I'm struggling to understand how CPU works with RAM — what's the difference between cache memory and regular RAM, and why is cache faster?"
+
 Return ONLY a valid JSON array of strings, nothing else. No explanation, no markdown.
-Example: ["What is RAM?", "How does CPU work?", "Explain cache memory simply"]
+Example: ["What is RAM?", "How does CPU work?", "Why is cache memory faster than RAM?"]
 If no human prompts found, return: []`
                 }
               ]
