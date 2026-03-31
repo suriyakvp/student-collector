@@ -624,6 +624,7 @@ EXTRACTION RULES:
 - SKIP timestamps, page numbers, watermarks, platform branding
 - SKIP short meaningless replies like: "ok", "yes", "no", "thanks", "continue", "sure", "got it", "okay"
 - SKIP duplicate prompts — if same question appears twice, keep only once
+- Each student message in the conversation is a SEPARATE prompt — never merge multiple student messages into one single entry, even if they are on related topics
 
 CLEANING RULES (apply to every extracted prompt):
 - If prompt contains BOTH a question AND code/error — remove the code/error, keep only the question
