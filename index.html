@@ -313,9 +313,15 @@
         <label>Homework / Assignment</label>
         <select id="s-hw">
           <option value="">Select homework...</option>
-          <option>HW1</option><option>HW2</option><option>HW3</option>
-          <option>HW4</option><option>HW5</option><option>HW6</option>
-          <option>HW7</option><option>HW8</option><option>HW9</option><option>HW10</option>
+          <option>HW1</option><option>HW2</option>
+          <option>HW3</option><option>HW3a</option>
+          <option>HW4</option><option>HW4a</option>
+          <option>HW5</option><option>HW5a</option>
+          <option>HW6</option><option>HW6a</option>
+          <option>HW7</option><option>HW7a</option>
+          <option>HW8</option><option>HW8a</option>
+          <option>HW9</option><option>HW9a</option>
+          <option>HW10</option><option>HW10a</option>
           <option disabled>── In-Class Activity ──</option>
           <option>In-Class Activity 1</option><option>In-Class Activity 2</option><option>In-Class Activity 3</option>
           <option>In-Class Activity 4</option><option>In-Class Activity 5</option><option>In-Class Activity 6</option>
@@ -618,16 +624,20 @@ TASK: Extract ONLY the human/user questions and requests. Apply ALL rules below 
 
 EXTRACTION RULES:
 - SKIP all AI/assistant responses entirely
+- AI responses often start with phrases like: "Sure!", "Of course!", "Great question!", "You're correct!", "That's right!", "沒問題", "你說了", "你的理解完全正確", "沒錯", "很好", "正確", "當然", "好的", "我來" — SKIP these entirely
 - SKIP code blocks, error messages, stack traces, terminal output, file contents
+- If a message is mostly code (contains def, for, if, import, =, [], (), ::, indent patterns) with no clear question → SKIP entirely
 - SKIP image descriptions, file upload mentions like "[image uploaded]" or "[file attached]"
 - SKIP UI elements: "Copy code", "Regenerate", "Share", "Like", "Dislike", "Edit"
 - SKIP timestamps, page numbers, watermarks, platform branding
 - SKIP short meaningless replies like: "ok", "yes", "no", "thanks", "continue", "sure", "got it", "okay"
 - SKIP duplicate prompts — if same question appears twice, keep only once
+- SKIP the session timestamp command — if a message contains "以下對話的開頭，顯示日期跟時間格式" or "display the date and time in this exact format" or "display the date and time" or "At the start of this conversation, display" or "at the beginning of every new conversation" → skip it entirely
 - Each student message in the conversation is a SEPARATE prompt — never merge multiple student messages into one single entry, even if they are on related topics
 
 CLEANING RULES (apply to every extracted prompt):
-- If prompt contains BOTH a question AND code/error — remove the code/error, keep only the question
+- If prompt contains BOTH a question AND code/error — remove ALL code lines entirely, keep only the question text
+- A code line is any line containing: def, for, if, import, return, print, =, [], (), {}, #, indent
 - Example: "I got this error: TypeError undefined how do I fix?" → "How do I fix TypeError undefined error?"
 - Fix obvious spelling mistakes: "how dos cpu wurk" → "How does CPU work?"
 - Fix grammar errors while keeping original meaning
@@ -637,10 +647,11 @@ CLEANING RULES (apply to every extracted prompt):
 - If a prompt is truly unclear and cannot be understood → label it as "[Unclear prompt]"
 
 CHINESE TRANSLATION RULE:
-- If any prompt is written in Chinese (Traditional or Simplified), silently translate it to clean natural English — no label, no note, just the English version
-- Example: "記憶體如何運作？" → "How does memory work?"
-- Mixed Chinese/English: translate Chinese parts, keep English parts as-is
-- If a Chinese prompt is also long, translate it first then summarize it
+- Every prompt written in Chinese (Traditional or Simplified) — no matter how short — MUST be translated to clean natural English
+- Even 1-3 word Chinese prompts must be translated: "全域變數呢" → "What are global variables?", "解釋一下這段" → "Can you explain this section?", "逐行解釋" → "Please explain line by line"
+- No label, no note — just return the clean English translation
+- Mixed Chinese/English: translate ALL Chinese parts, keep English parts as-is
+- If a Chinese prompt is also long, translate it first then summarize while keeping the student's tone
 
 SUMMARIZATION RULE:
 - If any prompt (English or translated) is longer than 100 characters, shorten it by removing filler words, repeated points, and unnecessary context — but keep the student's original phrasing and tone
